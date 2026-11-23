@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import Button from './Button';
@@ -6,6 +7,10 @@ import useAuth from '../../hooks/useAuth';
 function Navbar() {
   const navigate = useNavigate();
   const { currentUser, isAuthenticated, logout } = useAuth();
+
+  const isAdmin =
+    isAuthenticated &&
+    String(currentUser?.role ?? '').toLowerCase() === 'admin';
 
   const handleLogout = () => {
     logout();
@@ -24,35 +29,69 @@ function Navbar() {
           <Link to="/browse">Browse</Link>
           <Link to="/auctions">Auctions</Link>
           <Link to="/exhibitions">Exhibitions</Link>
-          <Link to="/wishlist">Wishlist</Link>
-          <Link to="/cart">Cart</Link>
-          {currentUser?.role !== 'artist' && <Link to="/artist/dashboard">Artist</Link>}
+
+          {currentUser?.role !== 'artist' && (
+            <Link to="/collections">Collections</Link>
+          )}
+
           {currentUser?.role === 'artist' && (
             <>
               <Link to="/artist/dashboard">Artist Dashboard</Link>
               <Link to="/artist/artworks">My Artworks</Link>
               <Link to="/artist/artworks/new">Upload Artwork</Link>
-              <Link to="/artist/profile">Artist Profile</Link>
-              <Link to="/artist/inquiries">Buyer Inquiries</Link>
-              <Link to="/artist/exhibitions">Exhibitions</Link>
-              <Link to="/artist/auctions">Manage Auctions</Link>
-              <Link to="/artist/dashboard#sales-analytics">Sales Analytics</Link>
             </>
           )}
-          <Link to="/admin">Admin</Link>
+
+          {currentUser?.role === 'visitor' && (
+            <>
+              <Link to="/wishlist">Wishlist</Link>
+              <Link to="/cart">Cart</Link>
+            </>
+          )}
+
+          {isAdmin && (
+            <>
+              <Link to="/admin">Admin</Link>
+              <Link to="/admin/users">User Management</Link>
+              <Link to="/admin/artworks">Artwork Approval</Link>
+            </>
+          )}
         </nav>
 
         <div className="nav-actions">
           {isAuthenticated ? (
             <>
-              <span className="nav-user-name">{currentUser.name}</span>
-              <Link to="/profile" className="nav-link">Profile</Link>
-              <Link to="/orders" className="nav-link">Orders</Link>
-              <Button variant="outline" onClick={handleLogout}>Logout</Button>
+              <span className="nav-user-name">
+                {currentUser?.name || currentUser?.username || 'Account'}
+              </span>
+
+              <Link
+                to={
+                  currentUser?.role === 'artist'
+                    ? '/artist/profile'
+                    : '/profile'
+                }
+                className="nav-link"
+              >
+                Profile
+              </Link>
+
+              {currentUser?.role === 'visitor' && (
+                <Link to="/orders" className="nav-link">
+                  Orders
+                </Link>
+              )}
+
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
             </>
           ) : (
             <>
-              <Link to="/login" className="nav-link">Login</Link>
+              <Link to="/login" className="nav-link">
+                Login
+              </Link>
+
               <Link to="/register">
                 <Button variant="primary">Join</Button>
               </Link>

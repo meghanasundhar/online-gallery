@@ -913,6 +913,301 @@ select {
   gap: 28px;
 }
 
+.artist-dashboard-tools-section,
+.artist-collections-section {
+  display: grid;
+  gap: 18px;
+  scroll-margin-top: 100px;
+}
+
+.artist-dashboard-tools-section .page-header,
+.artist-collections-section .page-header {
+  margin-bottom: 0;
+}
+
+.artist-dashboard-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.artist-tool-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 20px;
+}
+
+.artist-tool-card h3,
+.artist-tool-card p {
+  margin: 0;
+}
+
+.artist-tool-card h3 {
+  margin-bottom: 8px;
+}
+
+.artist-tool-card p {
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.collection-form {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.collection-form > label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.collection-form > label input {
+  max-width: 520px;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.collection-artwork-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.collection-artwork-picker legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.collection-artwork-picker label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.artist-collections-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.artist-collection-card {
+  padding: 18px;
+}
+
+.artist-collection-card h3,
+.artist-collection-card p {
+  margin: 0 0 8px;
+}
+
+.artist-collection-card p {
+  color: var(--color-muted);
+}
+
+.artist-collection-card ul {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.external-art-search {
+  display: grid;
+  gap: 18px;
+  margin: 24px 0 34px;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.external-art-search .page-header {
+  margin-bottom: 0;
+}
+
+.external-art-search__form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.external-art-search__message {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.external-art-search__message--error {
+  color: #b91c1c;
+}
+
+.external-art-search__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.external-artwork-card {
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.external-artwork-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 35px rgba(31, 41, 55, 0.12);
+}
+
+.external-artwork-card > img,
+.external-artwork-card__placeholder {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  place-items: center;
+  background: #f3e8ff;
+  color: var(--color-primary-dark);
+}
+
+.external-artwork-card__body {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 15px;
+}
+
+.external-artwork-card__body h3,
+.external-artwork-card__body p {
+  margin: 0;
+}
+
+.external-artwork-card__body p,
+.external-artwork-card__body span {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.external-artwork-card__body a {
+  margin-top: 5px;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 22px;
+}
+
+.collection-card {
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.collection-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 35px rgba(31, 41, 55, 0.12);
+}
+
+.collection-card > a > img,
+.collection-card__placeholder {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: linear-gradient(135deg, #f3e8ff, #fdf2f8);
+  color: var(--color-primary-dark);
+  place-items: center;
+  font-weight: 700;
+}
+
+.collection-card__body {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+}
+
+.collection-card__body h2,
+.collection-card__body p {
+  margin: 0;
+}
+
+.collection-card__body p {
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.collection-card__body > span {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.collection-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collection-card__actions a,
+.collection-card__actions button {
+  flex: 1;
+  min-width: 0;
+}
+
+.collection-card__actions .app-button {
+  width: 100%;
+  padding-inline: 0.65rem;
+}
+
+.collection-detail-page {
+  display: grid;
+  gap: 30px;
+}
+
+.collection-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.collection-detail > img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  background: #f3e8ff;
+}
+
+.collection-detail__content {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 14px;
+  padding: 30px;
+}
+
+.collection-detail__content h1,
+.collection-detail__content p {
+  margin: 0;
+}
+
+.collection-detail__content a:not(.app-button) {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
 .artist-dashboard-heading,
 .artist-artworks-heading,
 .artist-dashboard-footer {
@@ -1819,6 +2114,195 @@ select {
   font-size: 2rem;
 }
 
+.admin-dashboard-page,
+.admin-users-page {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.admin-stat {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.admin-stat span {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.admin-stat strong {
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.admin-users-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+}
+
+.admin-users-entry h2,
+.admin-users-entry p {
+  margin: 0 0 6px;
+}
+
+.admin-users-entry p {
+  color: var(--color-muted);
+}
+
+.admin-user-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(170px, 240px) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 18px;
+}
+
+.admin-user-controls label {
+  display: grid;
+  gap: 7px;
+  font-weight: 600;
+}
+
+.admin-user-controls input,
+.admin-user-controls select {
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admin-user-controls > span {
+  padding-bottom: 0.75rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.admin-users-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-users-table th {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.admin-self-label {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-role,
+.account-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-role--artist {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.admin-role--admin {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.account-status--active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.account-status--inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-users-empty {
+  padding: 32px !important;
+  text-align: center !important;
+  color: var(--color-muted);
+}
+
+.admin-user-dialog {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  width: min(100%, 560px);
+  padding: 28px;
+}
+
+.admin-user-dialog h2,
+.admin-user-dialog p {
+  margin: 0;
+}
+
+.admin-user-dialog dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.admin-user-dialog dl div {
+  display: grid;
+  grid-template-columns: minmax(100px, 140px) 1fr;
+  gap: 12px;
+}
+
+.admin-user-dialog dt {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.admin-user-dialog dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .not-found {
   display: grid;
   place-items: center;
@@ -1836,6 +2320,7 @@ select {
   .artwork-detail,
   .auction-detail,
   .exhibition-detail,
+  .collection-detail,
   .cart-layout,
   .exhibition-banner,
   .cta-panel {
@@ -2045,6 +2530,15 @@ select {
     height: 240px;
   }
 
+  .collection-detail > img {
+    height: 240px;
+    min-height: 0;
+  }
+
+  .collection-detail__content {
+    padding: 22px;
+  }
+
   .exhibition-detail__content {
     padding: 22px;
   }
@@ -2055,5 +2549,41 @@ select {
 
   .exhibition-card__actions .app-button {
     white-space: normal;
+  }
+
+  .external-art-search {
+    padding: 17px;
+  }
+
+  .external-art-search__form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .external-art-search__form .app-button {
+    width: 100%;
+  }
+
+  .admin-users-entry {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-user-controls {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .admin-user-controls > span {
+    padding-bottom: 0;
+  }
+
+  .admin-user-dialog {
+    padding: 22px;
+  }
+
+  .admin-user-dialog dl div {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }

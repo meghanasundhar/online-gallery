@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
@@ -5,40 +6,78 @@ import Footer from '../components/common/Footer';
 import Button from '../components/common/Button';
 import ArtworkCard from '../components/artwork/ArtworkCard';
 import SectionTitle from '../components/common/SectionTitle';
-import { artworkReviews, featuredArtworks, featuredArtists } from '../data/sampleData';
+import {
+  artworkReviews,
+  featuredArtworks,
+  featuredArtists,
+} from '../data/sampleData';
 import useGalleryInteractions from '../hooks/useGalleryInteractions';
 import useAuth from '../hooks/useAuth';
-import { createInquiry, createOrder, recordArtworkView } from '../utils/storage';
 import useArtistArtworks from '../hooks/useArtistArtworks';
-import { getArtistProfile, getBuyerById } from '../utils/storage';
+import {
+  createInquiry,
+  createOrder,
+  recordArtworkView,
+  addToCart,
+  getCart,
+  getArtistProfile,
+  getBuyerById,
+} from '../utils/storage';
 
 function ArtworkDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser, isAuthenticated } = useAuth();
   const artistArtworks = useArtistArtworks();
+
   const artwork = [...featuredArtworks, ...artistArtworks]
     .find((item) => String(item.id) === String(id)) ?? featuredArtworks[0];
+
   const savedArtistProfile = getArtistProfile(artwork.artistId);
   const artistAccount = getBuyerById(artwork.artistId);
-  const artistArtwork = artistArtworks.find((item) => String(item.artistId) === String(artwork.artistId));
-  const artist = featuredArtists.find((item) => String(item.id) === String(artwork.artistId))
-    ?? {
-      id: artwork.artistId,
-      name: savedArtistProfile?.name || artistAccount?.name || artistArtwork?.artistName || artwork.artistName || artwork.artist || 'Gallery Artist',
-      specialty: savedArtistProfile?.specialization || 'Independent Artist',
-      bio: savedArtistProfile?.bio || artistAccount?.bio || 'Artist on the Online Art Gallery.',
-      profileImage: savedArtistProfile?.profileImage || artistAccount?.profileImage || artwork.image,
-      followers: 0,
-    };
+
+  const artistArtwork = artistArtworks.find(
+    (item) => String(item.artistId) === String(artwork.artistId)
+  );
+
+  const artist = featuredArtists.find(
+    (item) => String(item.id) === String(artwork.artistId)
+  ) ?? {
+    id: artwork.artistId,
+    name: savedArtistProfile?.name || artistAccount?.name ||
+      artistArtwork?.artistName || artwork.artistName ||
+      artwork.artist || 'Gallery Artist',
+    specialty: savedArtistProfile?.specialization || 'Independent Artist',
+    bio: savedArtistProfile?.bio || artistAccount?.bio ||
+      'Artist on the Online Art Gallery.',
+    profileImage: savedArtistProfile?.profileImage ||
+      artistAccount?.profileImage || artwork.image,
+    followers: 0,
+  };
 
   const [purchaseComplete, setPurchaseComplete] = useState(false);
+  const [cartMessage, setCartMessage] = useState('');
   const lastRecordedView = useRef(null);
+
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState('');
-  const [inquiryForm, setInquiryForm] = useState({ name: currentUser?.name ?? '', email: currentUser?.email ?? '', message: '' });
-  const [reviewList, setReviewList] = useState(artworkReviews[artwork.id] ?? []);
-  const [newReview, setNewReview] = useState({ reviewer: '', rating: 5, comment: '' });
+
+  const [inquiryForm, setInquiryForm] = useState({
+    name: currentUser?.name ?? '',
+    email: currentUser?.email ?? '',
+    message: '',
+  });
+
+  const [reviewList, setReviewList] = useState(
+    artworkReviews[artwork.id] ?? []
+  );
+
+  const [newReview, setNewReview] = useState({
+    reviewer: '',
+    rating: 5,
+    comment: '',
+  });
+
   const {
     isArtworkLiked,
     isArtworkSaved,
@@ -49,24 +88,35 @@ function ArtworkDetailsPage() {
     getLikeCount,
     getFollowerCount,
   } = useGalleryInteractions();
+
   const liked = isArtworkLiked(artwork.id);
   const saved = isArtworkSaved(artwork.id);
   const followed = isArtistFollowed(artist.id);
 
   useEffect(() => {
     const viewKey = `${artwork.id}:${currentUser?.id ?? 'guest'}`;
+
     if (lastRecordedView.current === viewKey) return;
+
     lastRecordedView.current = viewKey;
     recordArtworkView(artwork.id, currentUser?.id, artwork.artistId);
   }, [artwork.id, artwork.artistId, currentUser?.id]);
 
-  const relatedArtworks = [...featuredArtworks, ...artistArtworks].filter(
-    (item) => item.category === artwork.category && item.id !== artwork.id
-  ).slice(0, 4);
+  const relatedArtworks = [...featuredArtworks, ...artistArtworks]
+    .filter(
+      (item) =>
+        item.category === artwork.category &&
+        item.id !== artwork.id
+    )
+    .slice(0, 4);
 
   const averageRating = useMemo(() => {
     if (!reviewList.length) return 0;
-    return reviewList.reduce((total, review) => total + review.rating, 0) / reviewList.length;
+
+    return reviewList.reduce(
+      (total, review) => total + review.rating,
+      0
+    ) / reviewList.length;
   }, [reviewList]);
 
   const handleReviewSubmit = (event) => {
@@ -85,12 +135,22 @@ function ArtworkDetailsPage() {
     };
 
     setReviewList((previous) => [nextReview, ...previous]);
-    setNewReview({ reviewer: '', rating: 5, comment: '' });
+
+    setNewReview({
+      reviewer: '',
+      rating: 5,
+      comment: '',
+    });
   };
 
+  // Existing direct purchase functionality
   const handleDirectPurchase = () => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: `/artwork/${artwork.id}` } } });
+      navigate('/login', {
+        state: {
+          from: { pathname: `/artwork/${artwork.id}` },
+        },
+      });
       return;
     }
 
@@ -104,37 +164,76 @@ function ArtworkDetailsPage() {
       purchaseType: 'Direct Purchase',
       status: 'Confirmed',
     });
+
     setPurchaseComplete(true);
+  };
+
+  // Add artwork to visitor cart
+  const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: {
+          from: { pathname: `/artwork/${artwork.id}` },
+        },
+      });
+      return;
+    }
+
+    if (currentUser.role !== 'visitor') {
+      setCartMessage('Only visitors can add artworks to the cart.');
+      return;
+    }
+
+    const existingCart = getCart(currentUser.id);
+
+    if (existingCart.artworkIds.includes(String(artwork.id))) {
+      setCartMessage('This artwork is already in your cart.');
+      return;
+    }
+
+    addToCart(currentUser.id, artwork.id);
+
+    setCartMessage('Artwork added to your cart successfully!');
   };
 
   const handleContactArtist = () => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: `/artwork/${artwork.id}` } } });
+      navigate('/login', {
+        state: {
+          from: { pathname: `/artwork/${artwork.id}` },
+        },
+      });
       return;
     }
+
     if (currentUser.role !== 'visitor') {
       setInquiryMessage('Only signed-in visitors can contact artists.');
       return;
     }
+
     setInquiryForm((previous) => ({
       ...previous,
       name: previous.name || currentUser.name,
       email: previous.email || currentUser.email,
     }));
+
     setShowInquiryForm(true);
     setInquiryMessage('');
   };
 
   const handleInquirySubmit = (event) => {
     event.preventDefault();
+
     if (currentUser.role !== 'visitor') {
       setInquiryMessage('Only signed-in visitors can contact artists.');
       return;
     }
+
     if (!inquiryForm.message.trim()) {
       setInquiryMessage('Please enter a message before submitting.');
       return;
     }
+
     createInquiry({
       artworkId: artwork.id,
       artworkTitle: artwork.title,
@@ -144,7 +243,12 @@ function ArtworkDetailsPage() {
       buyerEmail: inquiryForm.email.trim(),
       message: inquiryForm.message.trim(),
     });
-    setInquiryForm((previous) => ({ ...previous, message: '' }));
+
+    setInquiryForm((previous) => ({
+      ...previous,
+      message: '',
+    }));
+
     setShowInquiryForm(false);
     setInquiryMessage('Inquiry sent successfully.');
   };
@@ -158,7 +262,11 @@ function ArtworkDetailsPage() {
       <main className="container page-shell detail-page">
         <article className="artwork-detail card">
           <div className="detail-visual">
-            <img src={artwork.image} alt={artwork.title} className="detail-image" />
+            <img
+              src={artwork.image}
+              alt={artwork.title}
+              className="detail-image"
+            />
           </div>
 
           <div className="detail-content">
@@ -166,7 +274,11 @@ function ArtworkDetailsPage() {
             <h1>{artwork.title}</h1>
 
             <div className="meta-line">
-              <span>By <Link to={`/artist/${artwork.artistId}`}>{artwork.artist || artwork.artistName || artist.name}</Link></span>
+              <span>
+                By <Link to={`/artist/${artwork.artistId}`}>
+                  {artwork.artist || artwork.artistName || artist.name}
+                </Link>
+              </span>
               <span>{artwork.createdAt}</span>
             </div>
 
@@ -196,21 +308,105 @@ function ArtworkDetailsPage() {
                 {saved ? 'Saved' : 'Save to Wishlist'}
               </button>
 
-              <button type="button" className="detail-button detail-button--primary" onClick={handleDirectPurchase} disabled={purchaseComplete}>
+              <button
+                type="button"
+                className="detail-button detail-button--primary"
+                onClick={handleDirectPurchase}
+                disabled={purchaseComplete}
+              >
                 {purchaseComplete ? 'Purchased' : 'Purchase Artwork'}
               </button>
-              <button type="button" className="detail-button" onClick={handleContactArtist}>Contact Artist</button>
+
+              <button
+                type="button"
+                className="detail-button"
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </button>
+
+              <button
+                type="button"
+                className="detail-button"
+                onClick={handleContactArtist}
+              >
+                Contact Artist
+              </button>
             </div>
 
-            {inquiryMessage && <p className="form-message form-message--success" role="status">{inquiryMessage}</p>}
+            {cartMessage && (
+              <p className="form-message" role="status">
+                {cartMessage} <Link to="/cart">View Cart</Link>
+              </p>
+            )}
+
+            {inquiryMessage && (
+              <p className="form-message form-message--success" role="status">
+                {inquiryMessage}
+              </p>
+            )}
 
             {showInquiryForm && (
-              <form className="contact-artist-form" onSubmit={handleInquirySubmit}>
+              <form
+                className="contact-artist-form"
+                onSubmit={handleInquirySubmit}
+              >
                 <h2>Contact {artist.name}</h2>
-                <label>Name<input value={inquiryForm.name} onChange={(event) => setInquiryForm((previous) => ({ ...previous, name: event.target.value }))} required /></label>
-                <label>Email<input type="email" value={inquiryForm.email} onChange={(event) => setInquiryForm((previous) => ({ ...previous, email: event.target.value }))} required /></label>
-                <label>Message<textarea value={inquiryForm.message} onChange={(event) => setInquiryForm((previous) => ({ ...previous, message: event.target.value }))} rows="4" required /></label>
-                <div className="dashboard-actions"><Button type="submit">Send Inquiry</Button><Button type="button" variant="outline" onClick={() => setShowInquiryForm(false)}>Cancel</Button></div>
+
+                <label>
+                  Name
+                  <input
+                    value={inquiryForm.name}
+                    onChange={(event) =>
+                      setInquiryForm((previous) => ({
+                        ...previous,
+                        name: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    value={inquiryForm.email}
+                    onChange={(event) =>
+                      setInquiryForm((previous) => ({
+                        ...previous,
+                        email: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </label>
+
+                <label>
+                  Message
+                  <textarea
+                    value={inquiryForm.message}
+                    onChange={(event) =>
+                      setInquiryForm((previous) => ({
+                        ...previous,
+                        message: event.target.value,
+                      }))
+                    }
+                    rows="4"
+                    required
+                  />
+                </label>
+
+                <div className="dashboard-actions">
+                  <Button type="submit">Send Inquiry</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowInquiryForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </form>
             )}
 
@@ -226,7 +422,12 @@ function ArtworkDetailsPage() {
 
         <section className="artist-panel card">
           <div className="artist-profile">
-            <img src={artist.profileImage} alt={artist.name} className="artist-profile__image" />
+            <img
+              src={artist.profileImage}
+              alt={artist.name}
+              className="artist-profile__image"
+            />
+
             <div>
               <p className="eyebrow">Artist</p>
               <h2>{artist.name}</h2>
@@ -238,12 +439,19 @@ function ArtworkDetailsPage() {
           <p className="artist-bio">{artist.bio}</p>
 
           <div className="detail-actions detail-actions--compact">
-            <button type="button" className={`detail-button ${followed ? 'detail-button--active' : ''}`} aria-pressed={followed} onClick={() => toggleFollowForArtist(artist.id)}>
+            <button
+              type="button"
+              className={`detail-button ${followed ? 'detail-button--active' : ''}`}
+              aria-pressed={followed}
+              onClick={() => toggleFollowForArtist(artist.id)}
+            >
               {followed ? 'Following' : 'Follow Artist'}
             </button>
 
             <Link to={`/artist/${artist.id}`}>
-              <button type="button" className="detail-button">View Artist Profile</button>
+              <button type="button" className="detail-button">
+                View Artist Profile
+              </button>
             </Link>
           </div>
         </section>
@@ -257,7 +465,10 @@ function ArtworkDetailsPage() {
             <span>{reviewList.length} reviews</span>
           </div>
 
-          <div className="stars" aria-label={`Average rating ${averageRating.toFixed(1)} out of 5`}>
+          <div
+            className="stars"
+            aria-label={`Average rating ${averageRating.toFixed(1)} out of 5`}
+          >
             {'★'.repeat(Math.round(averageRating || 0))}
             {'☆'.repeat(5 - Math.round(averageRating || 0))}
           </div>
@@ -269,7 +480,12 @@ function ArtworkDetailsPage() {
                   <strong>{review.reviewer}</strong>
                   <span>{review.date}</span>
                 </div>
-                <div className="stars stars--small">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
+
+                <div className="stars stars--small">
+                  {'★'.repeat(review.rating)}
+                  {'☆'.repeat(5 - review.rating)}
+                </div>
+
                 <p>{review.comment}</p>
               </article>
             ))}
@@ -283,7 +499,12 @@ function ArtworkDetailsPage() {
               <input
                 type="text"
                 value={newReview.reviewer}
-                onChange={(event) => setNewReview((previous) => ({ ...previous, reviewer: event.target.value }))}
+                onChange={(event) =>
+                  setNewReview((previous) => ({
+                    ...previous,
+                    reviewer: event.target.value,
+                  }))
+                }
                 placeholder="Enter your name"
               />
             </label>
@@ -292,7 +513,12 @@ function ArtworkDetailsPage() {
               Your rating
               <select
                 value={newReview.rating}
-                onChange={(event) => setNewReview((previous) => ({ ...previous, rating: Number(event.target.value) }))}
+                onChange={(event) =>
+                  setNewReview((previous) => ({
+                    ...previous,
+                    rating: Number(event.target.value),
+                  }))
+                }
               >
                 <option value={5}>5 stars</option>
                 <option value={4}>4 stars</option>
@@ -306,7 +532,12 @@ function ArtworkDetailsPage() {
               Your review
               <textarea
                 value={newReview.comment}
-                onChange={(event) => setNewReview((previous) => ({ ...previous, comment: event.target.value }))}
+                onChange={(event) =>
+                  setNewReview((previous) => ({
+                    ...previous,
+                    comment: event.target.value,
+                  }))
+                }
                 rows="4"
                 placeholder="Share your thoughts about this piece"
               />
@@ -317,7 +548,11 @@ function ArtworkDetailsPage() {
         </section>
 
         <section className="related-section">
-          <SectionTitle title="Related Artworks" subtitle={`More from the ${artwork.category} collection.`} />
+          <SectionTitle
+            title="Related Artworks"
+            subtitle={`More from the ${artwork.category} collection.`}
+          />
+
           <div className="section-grid related-grid">
             {relatedArtworks.map((item) => (
               <ArtworkCard key={item.id} artwork={item} />

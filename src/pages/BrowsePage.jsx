@@ -7,6 +7,7 @@ import ArtworkCard from '../components/artwork/ArtworkCard';
 import { galleryArtworks } from '../data/sampleData';
 import useGalleryInteractions from '../hooks/useGalleryInteractions';
 import useArtistArtworks from '../hooks/useArtistArtworks';
+import ArtInstituteSearch from '../components/artwork/ArtInstituteSearch';
 
 const categoryOptions = ['All', 'Paintings', 'Digital Art', 'Photography', 'Sculpture', 'Abstract Art', 'Traditional Art'];
 
@@ -96,6 +97,8 @@ function BrowsePage() {
             </button>
           ))}
         </div>
+
+        <ArtInstituteSearch />
 
         <SectionTitle title={selectedCategory === 'All' ? 'All Artwork' : selectedCategory} subtitle="A curated mix of styles and mediums." />
 

@@ -11,10 +11,10 @@ export function getData(key, fallback = null) {
   }
 }
 
-export function setData(key, value) {
+export function setData(key, value, { notify = true } = {}) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
-    window.dispatchEvent(new Event('artGalleryStorageChange'));
+    if (notify) window.dispatchEvent(new Event('artGalleryStorageChange'));
     return true;
   } catch (error) {
     console.error(`Unable to save ${key} to localStorage:`, error);
@@ -90,6 +90,45 @@ export function isInWishlist(userId, artworkId) {
   return getWishlist(userId).artworkIds.includes(String(artworkId));
 }
 
+export function getCart(userId) {
+  const record = getUserRecord('artGalleryCarts', userId);
+  return {
+    userId: record.userId,
+    artworkIds: normalizeIds(record.artworkIds ?? []),
+  };
+}
+
+export function addToCart(userId, artworkId) {
+  if (userId == null || artworkId == null) return null;
+
+  const cart = getCart(userId);
+
+  return setUserRecord('artGalleryCarts', {
+    userId,
+    artworkIds: normalizeIds([...cart.artworkIds, artworkId]),
+  });
+}
+
+export function removeFromCart(userId, artworkId) {
+  if (userId == null) return null;
+
+  const cart = getCart(userId);
+
+  return setUserRecord('artGalleryCarts', {
+    userId,
+    artworkIds: cart.artworkIds.filter((id) => id !== String(artworkId)),
+  });
+}
+
+export function clearCart(userId) {
+  if (userId == null) return null;
+
+  return setUserRecord('artGalleryCarts', {
+    userId,
+    artworkIds: [],
+  });
+}
+
 export function getLikes(userId) {
   const record = getUserRecord('artGalleryLikes', userId);
   return { userId: record.userId, artworkIds: normalizeIds(record.artworkIds ?? []) };
@@ -144,8 +183,7 @@ export function recordArtworkView(artworkId, viewerId, ownerArtistId) {
 
 export function getBuyerById(userId) {
   if (userId == null) return null;
-  const users = getData('artGalleryUsers', []);
-  return (Array.isArray(users) ? users : []).find((user) => String(user.id) === String(userId)) ?? null;
+  return getUsers().find((user) => String(user.id) === String(userId)) ?? null;
 }
 
 export function getFollowing(userId) {
@@ -194,7 +232,7 @@ export function getAuctions() {
     status: resolveAuctionStatus(auction),
   }));
   if (updatedAuctions.some((auction, index) => auction.status !== auctions[index].status)) {
-    setData('artGalleryAuctions', updatedAuctions);
+    setData('artGalleryAuctions', updatedAuctions, { notify: false });
   }
   return updatedAuctions;
 }
@@ -396,6 +434,94 @@ export function deleteOwnedArtistArtwork(artistId, artworkId) {
   return true;
 }
 
+export function getArtistCollections(artistId) {
+  if (artistId == null) return [];
+  return getCollections().filter((collection) => String(collection.artistId) === String(artistId));
+}
+
+export function getCollections() {
+  const stored = getData('artGalleryCollections');
+  if (Array.isArray(stored)) return stored;
+
+  const legacy = getData('artGalleryArtistCollections', []);
+  const migrated = (Array.isArray(legacy) ? legacy : []).map((collection) => {
+    const firstArtwork = getAllArtistArtworks().find((artwork) =>
+      String(artwork.artistId) === String(collection.artistId)
+      && (collection.artworkIds ?? []).map(String).includes(String(artwork.id))
+    );
+    return {
+      id: collection.id,
+      artistId: collection.artistId,
+      name: collection.name,
+      description: '',
+      coverImage: firstArtwork?.image ?? '',
+      artworkIds: normalizeIds(collection.artworkIds ?? []),
+      createdAt: collection.createdAt ?? new Date().toISOString(),
+    };
+  });
+  if (migrated.length) setData('artGalleryCollections', migrated);
+  return migrated;
+}
+
+export function getCollectionsForArtist(artistId) {
+  return getArtistCollections(artistId);
+}
+
+export function getCollectionById(collectionId) {
+  return getCollections().find((collection) => String(collection.id) === String(collectionId)) ?? null;
+}
+
+export function createArtistCollection(artistId, collectionData, legacyArtworkIds = []) {
+  if (artistId == null) return null;
+  const data = typeof collectionData === 'string'
+    ? { name: collectionData, artworkIds: legacyArtworkIds }
+    : collectionData;
+  if (!data?.name?.trim()) return null;
+  const ownedArtworkIds = new Set(getArtistArtworks(artistId).map((artwork) => String(artwork.id)));
+  const collection = {
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    artistId,
+    name: data.name.trim(),
+    description: data.description?.trim() ?? '',
+    coverImage: data.coverImage?.trim() || '',
+    artworkIds: normalizeIds(data.artworkIds ?? []).filter((artworkId) => ownedArtworkIds.has(artworkId)),
+    createdAt: new Date().toISOString(),
+  };
+  const collections = getCollections();
+  setData('artGalleryCollections', [...collections, collection]);
+  return collection;
+}
+
+export function updateOwnedArtistCollection(artistId, collectionId, collectionData) {
+  const collections = getCollections();
+  const existing = collections.find((collection) =>
+    String(collection.id) === String(collectionId) && String(collection.artistId) === String(artistId)
+  );
+  if (!existing) return null;
+  const ownedArtworkIds = new Set(getArtistArtworks(artistId).map((artwork) => String(artwork.id)));
+  const updated = {
+    ...existing,
+    name: collectionData.name.trim(),
+    description: collectionData.description?.trim() ?? '',
+    coverImage: collectionData.coverImage?.trim() ?? '',
+    artworkIds: normalizeIds(collectionData.artworkIds ?? []).filter((artworkId) => ownedArtworkIds.has(artworkId)),
+  };
+  setData('artGalleryCollections', collections.map((collection) => collection.id === existing.id ? updated : collection));
+  return updated;
+}
+
+export function deleteOwnedArtistCollection(artistId, collectionId) {
+  const collections = getCollections();
+  const owned = collections.some((collection) =>
+    String(collection.id) === String(collectionId) && String(collection.artistId) === String(artistId)
+  );
+  if (!owned) return false;
+  setData('artGalleryCollections', collections.filter((collection) =>
+    !(String(collection.id) === String(collectionId) && String(collection.artistId) === String(artistId))
+  ));
+  return true;
+}
+
 export function getInquiries() {
   const inquiries = getData('artGalleryInquiries', []);
   return Array.isArray(inquiries) ? inquiries : [];
@@ -499,4 +625,37 @@ export function deleteOwnedExhibition(artistId, exhibitionId) {
     !(String(item.id) === String(exhibitionId) && String(item.artistId) === String(artistId))
   ));
   return true;
+}
+
+export function getUsers() {
+  const users = getData('artGalleryUsers', []);
+  return Array.isArray(users)
+    ? users
+      .filter((user) => user && typeof user === 'object')
+      .map((user) => {
+        const safeUser = { ...user };
+        delete safeUser.password;
+        delete safeUser.passwordHash;
+        delete safeUser.token;
+        return safeUser;
+      })
+    : [];
+}
+
+export function isAccountActive(user) {
+  if (!user) return false;
+  const inactiveStatuses = ['inactive', 'deactivated', 'disabled', 'suspended'];
+  if (user.isActive === false) return false;
+  if (user.accountStatus != null) return !inactiveStatuses.includes(String(user.accountStatus).toLowerCase());
+  return !inactiveStatuses.includes(String(user.status ?? '').toLowerCase());
+}
+
+export function updateUserAccountStatus(userId, isActive) {
+  const users = getUsers();
+  const target = users.find((user) => String(user.id) === String(userId));
+  if (!target) return null;
+
+  const updated = { ...target, accountStatus: isActive ? 'Active' : 'Inactive', isActive };
+  setData('artGalleryUsers', users.map((user) => String(user.id) === String(userId) ? updated : user));
+  return updated;
 }

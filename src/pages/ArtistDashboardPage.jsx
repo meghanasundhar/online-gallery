@@ -88,6 +88,19 @@ function ArtistDashboardPage() {
           ))}
         </section>
 
+        <section className="artist-dashboard-tools-section">
+          <div className="page-header"><h2>Artist Workspace</h2><p>Manage the day-to-day work of your gallery.</p></div>
+          <div className="artist-dashboard-tools">
+            <article className="artist-tool-card card"><div><h3>Art Collections</h3><p>Group selected artworks into collections.</p></div><Link to="/artist/collections"><Button variant="outline">Manage Collections</Button></Link></article>
+            <article className="artist-tool-card card"><div><h3>Buyer Inquiries</h3><p>Read and respond to messages about your work.</p></div><Link to="/artist/inquiries"><Button variant="outline">View Inquiries</Button></Link></article>
+            <article className="artist-tool-card card"><div><h3>Exhibitions</h3><p>Create and manage virtual exhibitions.</p></div><Link to="/artist/exhibitions"><Button variant="outline">Manage Exhibitions</Button></Link></article>
+            <article className="artist-tool-card card"><div><h3>Auction Management</h3><p>Set up and manage auctions for your artworks.</p></div><Link to="/artist/auctions"><Button variant="outline">Manage Auctions</Button></Link></article>
+            <article className="artist-tool-card card"><div><h3>Sales & Analytics</h3><p>Review orders, revenue, and recent sales.</p></div><a href="#sales-analytics"><Button variant="outline">View Sales</Button></a></article>
+            <article className="artist-tool-card card"><div><h3>Gallery Performance</h3><p>Track artwork views, likes, saves, and followers.</p></div><a href="#gallery-performance"><Button variant="outline">View Performance</Button></a></article>
+            <article className="artist-tool-card card"><div><h3>Artist Profile</h3><p>Update your public biography and contact details.</p></div><Link to="/artist/profile"><Button variant="outline">Manage Profile</Button></Link></article>
+          </div>
+        </section>
+
         <section id="sales-analytics" className="artist-analytics-section">
           <div className="page-header"><h2>Sales Analytics</h2><p>Sales are calculated from orders containing your artwork.</p></div>
           <div className="artist-stats-grid artist-stats-grid--sales">
@@ -140,10 +153,6 @@ function ArtistDashboardPage() {
           ) : <div className="empty-state card"><p>Upload artwork to see performance here.</p></div>}
         </section>
 
-        <section className="artist-dashboard-footer">
-          <div><h2>Your collection</h2><p>Review and manage your published pieces.</p></div>
-          <Link to="/artist/artworks"><Button variant="outline">View My Artworks</Button></Link>
-        </section>
       </main>
       <Footer />
     </>

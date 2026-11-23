@@ -336,4 +336,4 @@ export const artworkReviews = {
   12: [
     { id: 14, reviewer: 'Noah C.', rating: 5, comment: 'A monumental piece with striking presence.', date: '2024-07-14' },
   ],
-};
+}

@@ -12,15 +12,23 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const result = login(email, password);
-    if (!result.success) {
-      setError(result.error);
-      return;
+    setIsSubmitting(true);
+    try {
+      const result = await login(email, password);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      const destination = location.state?.from?.pathname
+        ?? (result.user?.role === 'admin' ? '/admin' : result.user?.role === 'artist' ? '/artist/dashboard' : '/profile');
+      navigate(destination, { replace: true });
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate(location.state?.from?.pathname ?? '/profile', { replace: true });
   };
 
   return (
@@ -32,6 +40,7 @@ function LoginPage() {
           <p>Login to continue exploring and collecting art.</p>
 
           <form className="auth-form" onSubmit={handleSubmit}>
+            {location.state?.notice && <p className="form-message form-message--success" role="status">{location.state.notice}</p>}
             <label>
               Email
               <input type="email" value={email} onChange={(event) => { setEmail(event.target.value); setError(''); }} autoComplete="email" required />
@@ -43,7 +52,7 @@ function LoginPage() {
             </label>
 
             {error && <p className="form-message form-message--error" role="alert">{error}</p>}
-            <Button type="submit">Login</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Signing in…' : 'Login'}</Button>
           </form>
           <p className="auth-switch">New to the gallery? <Link to="/register">Create an account</Link></p>
         </section>

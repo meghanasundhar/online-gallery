@@ -10,13 +10,14 @@ function RegisterPage() {
   const { register } = useAuth();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'visitor' });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateField = (event) => {
     setForm((previous) => ({ ...previous, [event.target.name]: event.target.value }));
     setError('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const { name, email, password, confirmPassword, role } = form;
 
@@ -37,12 +38,20 @@ function RegisterPage() {
       return;
     }
 
-    const result = register({ name, email, password, role });
-    if (!result.success) {
-      setError(result.error);
-      return;
+    setIsSubmitting(true);
+    try {
+      const result = await register({ name, email, password, role });
+      if (!result.success) {
+        setError(result.error);
+        if (result.registered) {
+          navigate('/login', { replace: true, state: { notice: 'Your account was created. Please sign in.' } });
+        }
+        return;
+      }
+      navigate(result.user?.role === 'artist' ? '/artist/dashboard' : '/profile', { replace: true });
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate('/profile', { replace: true });
   };
 
   return (
@@ -83,7 +92,7 @@ function RegisterPage() {
             </label>
 
             {error && <p className="form-message form-message--error" role="alert">{error}</p>}
-            <Button type="submit">Create Account</Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating account…' : 'Create Account'}</Button>
           </form>
           <p className="auth-switch">Already registered? <Link to="/login">Login</Link></p>
         </section>
