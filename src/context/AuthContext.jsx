@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 const USERS_KEY = 'artGalleryUsers';
 const CURRENT_USER_KEY = 'artGalleryCurrentUser';
 const TOKEN_KEY = 'artGalleryJwtToken';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const DEFAULT_PROFILE_IMAGE = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
 
 async function requestAuthApi(path, { method = 'GET', token, body } = {}) {
